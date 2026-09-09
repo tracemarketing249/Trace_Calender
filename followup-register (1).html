@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Register — Follow-up Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,500;0,600;0,700;1,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEFF2;
+    --surface:#FFFFFF;
+    --surface-soft:#F5F6F8;
+    --ink:#1B2430;
+    --ink-soft:#5A6472;
+    --line:#D7DBE1;
+    --line-strong:#B9C0C9;
+    --accent:#2F5D50;
+    --accent-soft:#E4ECE9;
+    --overdue:#B23A2E;
+    --overdue-soft:#F7E7E4;
+    --warn:#B4791F;
+    --warn-soft:#F6EBD8;
+    --done:#8B93A0;
+    --done-soft:#EEF0F2;
+    --radius-sm:4px;
+    --radius-md:8px;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --sans: 'IBM Plex Sans', -apple-system, sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+  }
+  #app{display:flex;min-height:100vh;}
+
+  /* --- Sidebar / index --- */
+  .sidebar{
+    width:220px;
+    flex-shrink:0;
+    background:var(--surface);
+    border-right:1px solid var(--line);
+    padding:28px 0;
+    display:flex;
+    flex-direction:column;
+  }
+  .brand{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:20px;
+    padding:0 24px 24px 24px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:8px;
+    letter-spacing:0.2px;
+  }
+  .brand span{display:block;font-family:var(--sans);font-size:11px;color:var(--ink-soft);font-weight:500;margin-top:4px;}
+  .nav-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:11px 24px;
+    font-size:14.5px;
+    font-weight:500;
+    color:var(--ink-soft);
+    cursor:pointer;
+    border-left:3px solid transparent;
+    transition:background .12s ease, color .12s ease;
+  }
+  .nav-item:hover{background:var(--surface-soft); color:var(--ink);}
+  .nav-item.active{
+    color:var(--ink);
+    border-left-color:var(--accent);
+    background:var(--accent-soft);
+    font-weight:600;
+  }
+  .nav-count{
+    margin-left:auto;
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--ink-soft);
+    background:var(--surface-soft);
+    padding:1px 6px;
+    border-radius:10px;
+  }
+  .nav-item.active .nav-count{background:var(--surface);}
+  .sidebar-foot{margin-top:auto;padding:16px 24px 4px 24px;}
+  .quickadd-btn{
+    width:100%;
+    background:var(--ink);
+    color:var(--surface);
+    border:none;
+    padding:11px 12px;
+    border-radius:var(--radius-sm);
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:13.5px;
+    cursor:pointer;
+    transition:background .12s ease;
+  }
+  .quickadd-btn:hover{background:#33404f;}
+
+  /* --- Main --- */
+  main{flex:1;padding:36px 44px;max-width:1080px;}
+  .page-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:26px;flex-wrap:wrap;gap:10px;}
+  h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:0;}
+  .subtext{color:var(--ink-soft);font-size:13.5px;margin-top:4px;}
+
+  .stat-row{display:flex;gap:14px;margin-bottom:30px;flex-wrap:wrap;}
+  .stat-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius-md);
+    padding:16px 18px;
+    min-width:130px;
+    flex:1;
+  }
+  .stat-num{font-family:var(--serif);font-size:28px;font-weight:600;line-height:1;}
+  .stat-label{font-size:12px;color:var(--ink-soft);margin-top:6px;font-weight:500;}
+  .stat-card.overdue .stat-num{color:var(--overdue);}
+  .stat-card.warn .stat-num{color:var(--warn);}
+  .stat-card.accent .stat-num{color:var(--accent);}
+
+  .section-title{
+    font-family:var(--serif);
+    font-size:15.5px;
+    font-weight:600;
+    margin:0 0 12px 0;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .section-title .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .dot.overdue{background:var(--overdue);}
+  .dot.warn{background:var(--warn);}
+  .dot.accent{background:var(--accent);}
+  .dot.done{background:var(--done);}
+
+  .task-list{list-style:none;margin:0 0 30px 0;padding:0;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface);overflow:hidden;}
+  .task-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 16px;
+    border-bottom:1px solid var(--line);
+    font-size:14px;
+  }
+  .task-row:last-child{border-bottom:none;}
+  .task-row:hover{background:var(--surface-soft);}
+  .task-check{
+    width:18px;height:18px;border-radius:50%;
+    border:1.5px solid var(--line-strong);
+    flex-shrink:0;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    color:transparent;font-size:11px;
+    transition:all .1s ease;
+  }
+  .task-check:hover{border-color:var(--accent);}
+  .task-check.checked{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .task-main{flex:1;min-width:0;}
+  .task-title{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .task-meta{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .task-meta a{color:var(--ink-soft);}
+  .task-due{
+    font-family:var(--mono);
+    font-size:12px;
+    padding:3px 8px;
+    border-radius:10px;
+    flex-shrink:0;
+    white-space:nowrap;
+  }
+  .task-due.overdue{background:var(--overdue-soft);color:var(--overdue);}
+  .task-due.warn{background:var(--warn-soft);color:var(--warn);}
+  .task-due.ok{background:var(--accent-soft);color:var(--accent);}
+  .task-due.done{background:var(--done-soft);color:var(--done);}
+  .task-del{color:var(--ink-soft);cursor:pointer;font-size:16px;padding:0 4px;flex-shrink:0;}
+  .task-del:hover{color:var(--overdue);}
+  .empty-note{padding:22px 16px;color:var(--ink-soft);font-size:13.5px;text-align:center;}
+
+  /* --- Calendar --- */
+  .cal-head{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+  .cal-nav{
+    width:30px;height:30px;border-radius:50%;border:1px solid var(--line);
+    background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;
+    font-size:15px;color:var(--ink-soft);
+  }
+  .cal-nav:hover{border-color:var(--accent);color:var(--accent);}
+  .cal-month{font-family:var(--serif);font-size:18px;font-weight:600;min-width:180px;}
+  .cal-today-btn{margin-left:auto;font-size:12.5px;color:var(--accent);cursor:pointer;font-weight:600;border:1px solid var(--accent);padding:5px 12px;border-radius:14px;background:var(--accent-soft);}
+
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--line);border-radius:var(--radius-md);overflow:hidden;background:var(--surface);}
+  .cal-dow{padding:8px 0;text-align:center;font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-soft);border-bottom:1px solid var(--line);}
+  .cal-cell{
+    min-height:84px;
+    border-right:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    padding:6px 7px;
+    cursor:pointer;
+    position:relative;
+    transition:background .1s ease;
+  }
+  .cal-cell:hover{background:var(--surface-soft);}
+  .cal-cell.other-month{background:#FAFAFB;color:var(--line-strong);}
+  .cal-cell.selected{background:var(--accent-soft); box-shadow:inset 0 0 0 2px var(--accent);}
+  .cal-daynum{font-family:var(--mono);font-size:12px;font-weight:500;}
+  .cal-daynum.is-today{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;
+  }
+  .cal-badges{margin-top:6px;display:flex;flex-direction:column;gap:2px;}
+  .cal-badge{font-size:10.5px;padding:1px 5px;border-radius:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cal-badge.overdue{background:var(--overdue-soft);color:var(--overdue);}
+  .cal-badge.today{background:var(--warn-soft);color:var(--warn);}
+  .cal-badge.future{background:var(--accent-soft);color:var(--accent);}
+  .cal-badge.more{color:var(--ink-soft);font-weight:500;}
+
+  .day-panel{margin-top:22px;}
+
+  /* --- Companies --- */
+  .company-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
+  .company-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-md);
+    padding:16px 18px;cursor:pointer;transition:border-color .12s ease, transform .08s ease;
+  }
+  .company-card:hover{border-color:var(--accent);}
+  .company-name{font-family:var(--serif);font-weight:600;font-size:16px;margin-bottom:6px;}
+  .company-sub{font-size:12px;color:var(--ink-soft);margin-bottom:10px;}
+  .company-stats{display:flex;gap:10px;font-size:12px;}
+  .company-stat{padding:2px 8px;border-radius:10px;font-weight:600;}
+  .company-stat.overdue{background:var(--overdue-soft);color:var(--overdue);}
+  .company-stat.open{background:var(--accent-soft);color:var(--accent);}
+  .company-contact{
+    margin-top:10px;padding-top:10px;border-top:1px solid var(--line);
+    font-size:11.5px;color:var(--ink-soft);font-family:var(--mono);
+  }
+  .company-contact.stale{color:var(--warn);}
+  .add-company-card{
+    border:1.5px dashed var(--line-strong);border-radius:var(--radius-md);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    color:var(--ink-soft);font-weight:600;font-size:13.5px;min-height:100px;
+  }
+  .add-company-card:hover{border-color:var(--accent);color:var(--accent);}
+
+  .contact-strip{
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-md);
+    padding:12px 16px;margin-bottom:22px;max-width:640px;
+  }
+  .contact-strip.stale{border-color:var(--warn);background:var(--warn-soft);}
+  .contact-strip-label{font-size:11px;color:var(--ink-soft);font-weight:600;text-transform:uppercase;letter-spacing:0.03em;}
+  .contact-strip-value{font-family:var(--mono);font-size:13.5px;margin-top:2px;}
+  .back-link{color:var(--ink-soft);cursor:pointer;font-size:13px;margin-bottom:10px;display:inline-flex;align-items:center;gap:5px;font-weight:500;}
+  .back-link:hover{color:var(--accent);}
+
+  /* --- Modal --- */
+  .overlay{
+    position:fixed;inset:0;background:rgba(27,36,48,0.35);
+    display:flex;align-items:center;justify-content:center;z-index:50;
+    padding:20px;
+  }
+  .modal{
+    background:var(--surface);border-radius:var(--radius-md);
+    width:100%;max-width:440px;padding:26px 26px 22px 26px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.2);
+  }
+  .modal h2{font-family:var(--serif);font-size:19px;margin:0 0 18px 0;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:5px;}
+  .field input, .field textarea, .field select{
+    width:100%;padding:9px 10px;border:1px solid var(--line-strong);border-radius:var(--radius-sm);
+    font-family:var(--sans);font-size:14px;background:var(--surface);color:var(--ink);
+  }
+  .field input:focus, .field textarea:focus, .field select:focus{outline:none;border-color:var(--accent);}
+  .field textarea{resize:vertical;min-height:56px;}
+  .field-row{display:flex;gap:10px;}
+  .field-row .field{flex:1;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;}
+  .btn{padding:9px 16px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:600;cursor:pointer;border:1px solid transparent;font-family:var(--sans);}
+  .btn-primary{background:var(--ink);color:#fff;}
+  .btn-primary:hover{background:#33404f;}
+  .btn-ghost{background:transparent;color:var(--ink-soft);border-color:var(--line-strong);}
+  .btn-ghost:hover{color:var(--ink);}
+  .btn-danger{background:transparent;color:var(--overdue);border-color:var(--overdue-soft);}
+  .btn-danger:hover{background:var(--overdue-soft);}
+
+  ::selection{background:var(--accent-soft);}
+  .loading-note{padding:40px;text-align:center;color:var(--ink-soft);}
+
+  @media (max-width: 720px){
+    #app{flex-direction:column;}
+    .sidebar{width:100%;flex-direction:row;overflow-x:auto;padding:14px 12px;border-right:none;border-bottom:1px solid var(--line);}
+    .brand{display:none;}
+    .nav-item{border-left:none;border-bottom:3px solid transparent;white-space:nowrap;padding:8px 14px;}
+    .nav-item.active{border-left:none;border-bottom-color:var(--accent);}
+    .sidebar-foot{margin-top:0;padding:0 0 0 8px;}
+    main{padding:22px 16px;}
+    .cal-cell{min-height:56px;}
+    .cal-badges{display:none;}
+    .cal-cell.has-items::after{content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--accent);}
+    .cal-cell.has-overdue::after{background:var(--overdue);}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="loading-note">Loading your register…</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- state ----------
+  let companies = [];   // {id, name, contact, notes, createdAt}
+  let tasks = [];        // {id, companyId, title, dueDate (YYYY-MM-DD), status ('open'|'done'), notes, priority, createdAt}
+  let route = { page: 'dashboard' }; // page: dashboard | calendar | companies | company
+  let calCursor = new Date(); calCursor.setDate(1);
+  let selectedDay = null; // YYYY-MM-DD
+  let modal = null; // {type:'quickadd'|'company'|'task', ...}
+  let loaded = false;
+
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  const todayStr = () => fmtDate(new Date());
+  function fmtDate(d){
+    const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  function parseDate(s){ const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+  function displayDate(s){
+    const d = parseDate(s);
+    return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year: d.getFullYear()!==new Date().getFullYear()?'numeric':undefined});
+  }
+  function daysBetween(a,b){ return Math.round((parseDate(b)-parseDate(a))/86400000); }
+
+  // ---------- storage ----------
+  async function loadAll(){
+    try{
+      const c = await window.storage.get('companies');
+      companies = c ? JSON.parse(c.value) : [];
+    }catch(e){ companies = []; }
+    try{
+      const t = await window.storage.get('followups');
+      tasks = t ? JSON.parse(t.value) : [];
+    }catch(e){ tasks = []; }
+    loaded = true;
+    render();
+  }
+  async function saveCompanies(){
+    try{ await window.storage.set('companies', JSON.stringify(companies)); }
+    catch(e){ console.error('save companies failed', e); }
+  }
+  async function saveTasks(){
+    try{ await window.storage.set('followups', JSON.stringify(tasks)); }
+    catch(e){ console.error('save tasks failed', e); }
+  }
+
+  // ---------- derived ----------
+  function companyName(id){ const c=companies.find(c=>c.id===id); return c? c.name : '—'; }
+  function openTasks(){ return tasks.filter(t=>t.status!=='done'); }
+  function overdueTasks(){ const td=todayStr(); return openTasks().filter(t=>t.dueDate < td).sort((a,b)=>a.dueDate.localeCompare(b.dueDate)); }
+  function todayTasks(){ const td=todayStr(); return openTasks().filter(t=>t.dueDate === td); }
+  function weekTasks(){
+    const td=todayStr();
+    const in7 = fmtDate(new Date(Date.now()+7*86400000));
+    return openTasks().filter(t=>t.dueDate > td && t.dueDate <= in7).sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
+  }
+  function tasksForCompany(cid){ return tasks.filter(t=>t.companyId===cid).sort((a,b)=>a.dueDate.localeCompare(b.dueDate)); }
+  function tasksForDay(day){ return tasks.filter(t=>t.dueDate===day).sort((a,b)=> (a.status==='done')-(b.status==='done')); }
+  function dueBadgeClass(dueDate,status){
+    if(status==='done') return 'done';
+    const td=todayStr();
+    if(dueDate<td) return 'overdue';
+    if(dueDate===td) return 'warn';
+    return 'ok';
+  }
+  function dueBadgeLabel(dueDate,status){
+    if(status==='done') return 'done';
+    const td=todayStr();
+    const diff = daysBetween(td,dueDate);
+    if(diff<0) return `${Math.abs(diff)}d overdue`;
+    if(diff===0) return 'today';
+    if(diff===1) return 'tomorrow';
+    return displayDate(dueDate);
+  }
+
+  // ---------- actions ----------
+  function toggleTask(id){
+    const t = tasks.find(t=>t.id===id);
+    if(!t) return;
+    t.status = t.status==='done' ? 'open' : 'done';
+    t.completedAt = t.status==='done' ? new Date().toISOString() : null;
+    saveTasks(); render();
+  }
+  function deleteTask(id){
+    tasks = tasks.filter(t=>t.id!==id);
+    saveTasks(); render();
+  }
+  function addCompany(name, contact, notes, lastContacted){
+    const c = { id: uid(), name: name.trim(), contact: contact.trim(), notes: notes.trim(), lastContacted: lastContacted || null, createdAt: new Date().toISOString() };
+    companies.push(c);
+    saveCompanies();
+    return c;
+  }
+  function markContactedToday(id){
+    const c = companies.find(c=>c.id===id);
+    if(!c) return;
+    c.lastContacted = todayStr();
+    saveCompanies(); render();
+  }
+  function daysSince(dateStr){
+    if(!dateStr) return null;
+    return daysBetween(dateStr, todayStr());
+  }
+  function lastContactedLabel(dateStr){
+    if(!dateStr) return 'Never logged';
+    const d = daysSince(dateStr);
+    if(d===0) return 'Contacted today';
+    if(d===1) return 'Contacted yesterday';
+    if(d<0) return `Contacted ${displayDate(dateStr)}`;
+    return `Contacted ${d}d ago`;
+  }
+  function addTask({companyId, title, dueDate, notes, priority}){
+    tasks.push({ id: uid(), companyId, title: title.trim(), dueDate, notes: (notes||'').trim(), priority: priority||'normal', status:'open', createdAt: new Date().toISOString(), completedAt:null });
+    saveTasks();
+  }
+  function deleteCompany(id){
+    companies = companies.filter(c=>c.id!==id);
+    tasks = tasks.filter(t=>t.companyId!==id);
+    saveCompanies(); saveTasks();
+  }
+
+  // ---------- rendering helpers ----------
+  function el(tag, attrs, ...children){
+    const e = document.createElement(tag);
+    if(attrs) for(const k in attrs){
+      if(k==='class') e.className = attrs[k];
+      else if(k.startsWith('on') && typeof attrs[k]==='function') e.addEventListener(k.slice(2), attrs[k]);
+      else if(k==='html') e.innerHTML = attrs[k];
+      else e.setAttribute(k, attrs[k]);
+    }
+    children.flat().forEach(c=>{
+      if(c===null||c===undefined) return;
+      if(typeof c==='string'||typeof c==='number') e.appendChild(document.createTextNode(c));
+      else e.appendChild(c);
+    });
+    return e;
+  }
+
+  function taskRow(t, opts={}){
+    const cls = dueBadgeClass(t.dueDate, t.status);
+    const row = el('li', {class:'task-row'},
+      el('div', {class:'task-check'+(t.status==='done'?' checked':''), onclick:()=>toggleTask(t.id)}, t.status==='done'?'✓':''),
+      el('div', {class:'task-main'},
+        el('div', {class:'task-title', style: t.status==='done'?'text-decoration:line-through;color:var(--ink-soft);':''}, t.title),
+        el('div', {class:'task-meta'}, opts.hideCompany ? (t.notes||'') : `${companyName(t.companyId)}${t.notes? ' · '+t.notes : ''}`)
+      ),
+      el('div', {class:'task-due '+cls}, dueBadgeLabel(t.dueDate, t.status)),
+      el('div', {class:'task-del', onclick:()=>{ if(confirm('Delete this follow-up?')) deleteTask(t.id); }}, '✕')
+    );
+    return row;
+  }
+
+  function taskListSection(title, dotClass, list, opts={}){
+    const wrap = el('div');
+    wrap.appendChild(el('h3', {class:'section-title'}, el('span',{class:'dot '+dotClass}), title, ` (${list.length})`));
+    const ul = el('ul', {class:'task-list'});
+    if(list.length===0){
+      ul.appendChild(el('li', {class:'empty-note'}, opts.emptyText || 'Nothing here.'));
+    } else {
+      list.forEach(t=>ul.appendChild(taskRow(t)));
+    }
+    wrap.appendChild(ul);
+    return wrap;
+  }
+
+  // ---------- pages ----------
+  function renderDashboard(container){
+    container.appendChild(el('div',{class:'page-head'},
+      el('div',{},
+        el('h1',{},'Dashboard'),
+        el('div',{class:'subtext'}, new Date().toLocaleDateString('en-US',{weekday:'long', month:'long', day:'numeric'}))
+      )
+    ));
+
+    const ov = overdueTasks(), td = todayTasks(), wk = weekTasks();
+    container.appendChild(el('div',{class:'stat-row'},
+      el('div',{class:'stat-card overdue'}, el('div',{class:'stat-num'}, String(ov.length)), el('div',{class:'stat-label'},'Overdue')),
+      el('div',{class:'stat-card warn'}, el('div',{class:'stat-num'}, String(td.length)), el('div',{class:'stat-label'},'Due Today')),
+      el('div',{class:'stat-card accent'}, el('div',{class:'stat-num'}, String(wk.length)), el('div',{class:'stat-label'},'Due This Week')),
+      el('div',{class:'stat-card'}, el('div',{class:'stat-num'}, String(companies.length)), el('div',{class:'stat-label'},'Companies Tracked')),
+    ));
+
+    container.appendChild(taskListSection('Overdue', 'overdue', ov, {emptyText:'Nothing overdue — you\'re on top of it.'}));
+    container.appendChild(taskListSection('Due Today', 'warn', td, {emptyText:'Nothing due today.'}));
+    container.appendChild(taskListSection('Due This Week', 'accent', wk, {emptyText:'Nothing due in the next 7 days.'}));
+  }
+
+  function renderCalendar(container){
+    container.appendChild(el('div',{class:'page-head'}, el('h1',{},'Calendar')));
+
+    const year = calCursor.getFullYear(), month = calCursor.getMonth();
+    const head = el('div',{class:'cal-head'},
+      el('div',{class:'cal-nav', onclick:()=>{ calCursor.setMonth(calCursor.getMonth()-1); render(); }}, '‹'),
+      el('div',{class:'cal-month'}, calCursor.toLocaleDateString('en-US',{month:'long', year:'numeric'})),
+      el('div',{class:'cal-nav', onclick:()=>{ calCursor.setMonth(calCursor.getMonth()+1); render(); }}, '›'),
+      el('div',{class:'cal-today-btn', onclick:()=>{ calCursor=new Date(); calCursor.setDate(1); selectedDay = todayStr(); render(); }}, 'Today')
+    );
+    container.appendChild(head);
+
+    const grid = el('div',{class:'cal-grid'});
+    ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d=>grid.appendChild(el('div',{class:'cal-dow'},d)));
+
+    const firstOfMonth = new Date(year, month, 1);
+    const startOffset = firstOfMonth.getDay();
+    const gridStart = new Date(year, month, 1 - startOffset);
+
+    for(let i=0;i<42;i++){
+      const cellDate = new Date(gridStart); cellDate.setDate(gridStart.getDate()+i);
+      const dayStr = fmtDate(cellDate);
+      const inMonth = cellDate.getMonth()===month;
+      const dayTasks = tasksForDay(dayStr).filter(t=>t.status!=='done');
+      const hasOverdue = dayTasks.some(t=>t.dueDate < todayStr());
+      let cls = 'cal-cell'+(inMonth?'':' other-month')+(dayStr===selectedDay?' selected':'')+(dayTasks.length?' has-items':'')+(hasOverdue?' has-overdue':'');
+      const cell = el('div',{class:cls, onclick:()=>{ selectedDay = dayStr; render(); }},
+        el('div',{class:'cal-daynum'+(dayStr===todayStr()?' is-today':'')}, String(cellDate.getDate()))
+      );
+      if(dayTasks.length){
+        const badges = el('div',{class:'cal-badges'});
+        dayTasks.slice(0,2).forEach(t=>{
+          const bcls = t.dueDate<todayStr() ? 'overdue' : (t.dueDate===todayStr()?'today':'future');
+          badges.appendChild(el('div',{class:'cal-badge '+bcls}, t.title));
+        });
+        if(dayTasks.length>2) badges.appendChild(el('div',{class:'cal-badge more'}, `+${dayTasks.length-2} more`));
+        cell.appendChild(badges);
+      }
+      grid.appendChild(cell);
+    }
+    container.appendChild(grid);
+
+    if(selectedDay){
+      const dayTasks = tasksForDay(selectedDay);
+      const panel = el('div',{class:'day-panel'});
+      panel.appendChild(el('h3',{class:'section-title'}, el('span',{class:'dot accent'}), displayDate(selectedDay)+ ` (${dayTasks.length})`));
+      const ul = el('ul',{class:'task-list'});
+      if(dayTasks.length===0) ul.appendChild(el('li',{class:'empty-note'},'Nothing due this day. Use “+ New follow-up” to add one.'));
+      else dayTasks.forEach(t=>ul.appendChild(taskRow(t)));
+      panel.appendChild(ul);
+      panel.appendChild(el('button',{class:'btn btn-ghost', style:'margin-top:10px;', onclick:()=>openModal({type:'task', prefillDate:selectedDay})}, '+ New follow-up for this day'));
+      container.appendChild(panel);
+    }
+  }
+
+  function renderCompaniesList(container){
+    container.appendChild(el('div',{class:'page-head'},
+      el('h1',{},'Companies')
+    ));
+    const grid = el('div',{class:'company-grid'});
+    companies.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(c=>{
+      const ct = tasksForCompany(c.id);
+      const openCt = ct.filter(t=>t.status!=='done');
+      const overdueCt = openCt.filter(t=>t.dueDate<todayStr());
+      const nearest = openCt.length ? openCt.slice().sort((a,b)=>a.dueDate.localeCompare(b.dueDate))[0] : null;
+      const dSince = daysSince(c.lastContacted);
+      const staleContact = dSince===null || dSince>14;
+      grid.appendChild(el('div',{class:'company-card', onclick:()=>{ route={page:'company', id:c.id}; render(); }},
+        el('div',{class:'company-name'}, c.name),
+        el('div',{class:'company-sub'}, nearest? `Next: ${dueBadgeLabel(nearest.dueDate,'open')} — ${nearest.title}` : (c.contact || 'No open follow-ups')),
+        el('div',{class:'company-stats'},
+          overdueCt.length? el('div',{class:'company-stat overdue'}, `${overdueCt.length} overdue`) : null,
+          el('div',{class:'company-stat open'}, `${openCt.length} open`)
+        ),
+        el('div',{class:'company-contact'+(staleContact?' stale':'')}, lastContactedLabel(c.lastContacted))
+      ));
+    });
+    grid.appendChild(el('div',{class:'add-company-card', onclick:()=>openModal({type:'company'})}, '+ Add company'));
+    container.appendChild(grid);
+  }
+
+  function renderCompanyDetail(container, id){
+    const c = companies.find(c=>c.id===id);
+    if(!c){ route={page:'companies'}; return renderCompaniesList(container); }
+    container.appendChild(el('div',{class:'back-link', onclick:()=>{ route={page:'companies'}; render(); }}, '← All companies'));
+    container.appendChild(el('div',{class:'page-head'},
+      el('div',{},
+        el('h1',{}, c.name),
+        el('div',{class:'subtext'}, c.contact || 'No contact info added')
+      ),
+      el('div',{style:'display:flex;gap:10px;'},
+        el('button',{class:'btn btn-ghost', onclick:()=>openModal({type:'company', edit:c})}, 'Edit'),
+        el('button',{class:'btn btn-danger', onclick:()=>{ if(confirm('Delete this company and all its follow-ups?')){ deleteCompany(c.id); route={page:'companies'}; render(); } }}, 'Delete')
+      )
+    ));
+    if(c.notes){
+      container.appendChild(el('div',{class:'subtext', style:'margin:-14px 0 22px 0;max-width:640px;'}, c.notes));
+    }
+    {
+      const dSince = daysSince(c.lastContacted);
+      const stale = dSince===null || dSince>14;
+      container.appendChild(el('div',{class:'contact-strip'+(stale?' stale':'')},
+        el('div',{},
+          el('div',{class:'contact-strip-label'}, 'Last contacted'),
+          el('div',{class:'contact-strip-value'}, lastContactedLabel(c.lastContacted))
+        ),
+        el('button',{class:'btn btn-ghost', onclick:()=>markContactedToday(c.id)}, 'Mark contacted today')
+      ));
+    }
+    const ct = tasksForCompany(c.id);
+    const open = ct.filter(t=>t.status!=='done');
+    const done = ct.filter(t=>t.status==='done');
+    container.appendChild(el('div',{style:'margin-bottom:16px;'},
+      el('button',{class:'btn btn-primary', onclick:()=>openModal({type:'task', companyId:c.id})}, '+ New follow-up for '+c.name)
+    ));
+    container.appendChild(taskListSection('Open follow-ups', 'accent', open, {emptyText:'No open follow-ups for this company.'}));
+    if(done.length) container.appendChild(taskListSection('Completed', 'done', done));
+  }
+
+  // ---------- modal ----------
+  function closeModal(){ modal=null; render(); }
+  function openModal(m){ modal=m; render(); }
+
+  function renderModal(){
+    if(!modal) return null;
+    if(modal.type==='company'){
+      const editing = modal.edit;
+      let nameV = editing? editing.name : '', contactV = editing? editing.contact:'', notesV = editing? editing.notes:'', lastContactedV = editing? (editing.lastContacted||'') : '';
+      const nameInput = el('input',{value:nameV, placeholder:'e.g. Acme Industries'});
+      const contactInput = el('input',{value:contactV, placeholder:'Contact person / email / phone'});
+      const notesInput = el('textarea',{placeholder:'Any context worth remembering'}); notesInput.value = notesV;
+      const lastContactedInput = el('input',{type:'date', value:lastContactedV});
+      const box = el('div',{class:'modal'},
+        el('h2',{}, editing? 'Edit company' : 'Add a company'),
+        el('div',{class:'field'}, el('label',{},'Company name'), nameInput),
+        el('div',{class:'field'}, el('label',{},'Contact'), contactInput),
+        el('div',{class:'field'}, el('label',{},'Last contacted'), lastContactedInput),
+        el('div',{class:'field'}, el('label',{},'Notes'), notesInput),
+        el('div',{class:'modal-actions'},
+          el('button',{class:'btn btn-ghost', onclick:closeModal}, 'Cancel'),
+          el('button',{class:'btn btn-primary', onclick:()=>{
+            if(!nameInput.value.trim()){ nameInput.focus(); return; }
+            if(editing){
+              editing.name=nameInput.value.trim(); editing.contact=contactInput.value.trim(); editing.notes=notesInput.value.trim(); editing.lastContacted=lastContactedInput.value||null;
+              saveCompanies();
+            } else {
+              addCompany(nameInput.value, contactInput.value, notesInput.value, lastContactedInput.value||null);
+            }
+            closeModal();
+          }}, editing? 'Save changes' : 'Add company')
+        )
+      );
+      return el('div',{class:'overlay', onclick:(e)=>{ if(e.target.classList.contains('overlay')) closeModal(); }}, box);
+    }
+    if(modal.type==='task' || modal.type==='quickadd'){
+      const isQuick = modal.type==='quickadd';
+      const companySelect = el('select',{});
+      companySelect.appendChild(el('option',{value:''}, '— choose company —'));
+      companies.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(c=>{
+        const o = el('option',{value:c.id}, c.name);
+        if(modal.companyId===c.id) o.selected = true;
+        companySelect.appendChild(o);
+      });
+      companySelect.appendChild(el('option',{value:'__new__'}, '+ New company…'));
+      const newCompanyInput = el('input',{placeholder:'New company name', style:'display:none;margin-top:8px;'});
+      companySelect.addEventListener('change', ()=>{
+        newCompanyInput.style.display = companySelect.value==='__new__' ? 'block' : 'none';
+      });
+      const titleInput = el('input',{placeholder:'e.g. Send revised quote'});
+      const dateInput = el('input',{type:'date', value: modal.prefillDate || todayStr()});
+      const priSelect = el('select',{});
+      [['normal','Normal'],['high','High priority']].forEach(([v,l])=>priSelect.appendChild(el('option',{value:v},l)));
+      const notesInput = el('textarea',{placeholder:'Optional details'});
+
+      const box = el('div',{class:'modal'},
+        el('h2',{}, 'New follow-up'),
+        el('div',{class:'field'}, el('label',{},'Company'), companySelect, newCompanyInput),
+        el('div',{class:'field'}, el('label',{},'What needs to be done'), titleInput),
+        el('div',{class:'field-row'},
+          el('div',{class:'field'}, el('label',{},'Due date (EDD)'), dateInput),
+          el('div',{class:'field'}, el('label',{},'Priority'), priSelect)
+        ),
+        el('div',{class:'field'}, el('label',{},'Notes'), notesInput),
+        el('div',{class:'modal-actions'},
+          el('button',{class:'btn btn-ghost', onclick:closeModal}, 'Cancel'),
+          el('button',{class:'btn btn-primary', onclick:async ()=>{
+            if(!titleInput.value.trim()){ titleInput.focus(); return; }
+            if(!dateInput.value){ dateInput.focus(); return; }
+            let cid = companySelect.value;
+            if(cid==='__new__'){
+              if(!newCompanyInput.value.trim()){ newCompanyInput.focus(); return; }
+              const c = addCompany(newCompanyInput.value, '', '');
+              cid = c.id;
+            }
+            if(!cid){ companySelect.focus(); return; }
+            addTask({companyId:cid, title:titleInput.value, dueDate:dateInput.value, notes:notesInput.value, priority:priSelect.value});
+            closeModal();
+          }}, 'Add follow-up')
+        )
+      );
+      return el('div',{class:'overlay', onclick:(e)=>{ if(e.target.classList.contains('overlay')) closeModal(); }}, box);
+    }
+    return null;
+  }
+
+  // ---------- root render ----------
+  function render(){
+    const app = document.getElementById('app');
+    app.innerHTML = '';
+    if(!loaded){ app.appendChild(el('div',{class:'loading-note'},'Loading your register…')); return; }
+
+    const ovCount = overdueTasks().length;
+
+    const sidebar = el('div',{class:'sidebar'},
+      el('div',{class:'brand'}, 'The Register', el('span',{},'Follow-up tracker')),
+      el('div',{class:'nav-item'+(route.page==='dashboard'?' active':''), onclick:()=>{route={page:'dashboard'}; render();}},
+        'Dashboard', ovCount? el('span',{class:'nav-count'}, String(ovCount)) : null),
+      el('div',{class:'nav-item'+(route.page==='calendar'?' active':''), onclick:()=>{route={page:'calendar'}; render();}}, 'Calendar'),
+      el('div',{class:'nav-item'+((route.page==='companies'||route.page==='company')?' active':''), onclick:()=>{route={page:'companies'}; render();}}, 'Companies'),
+      el('div',{class:'sidebar-foot'},
+        el('button',{class:'quickadd-btn', onclick:()=>openModal({type:'quickadd'})}, '+ New follow-up')
+      )
+    );
+    app.appendChild(sidebar);
+
+    const main = el('main',{});
+    if(route.page==='dashboard') renderDashboard(main);
+    else if(route.page==='calendar') renderCalendar(main);
+    else if(route.page==='companies') renderCompaniesList(main);
+    else if(route.page==='company') renderCompanyDetail(main, route.id);
+    app.appendChild(main);
+
+    const m = renderModal();
+    if(m) app.appendChild(m);
+  }
+
+  loadAll();
+})();
+</script>
+</body>
+</html>
