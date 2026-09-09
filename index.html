@@ -38,7 +38,7 @@
     -webkit-font-smoothing:antialiased;
   }
   #app{display:flex;min-height:100vh;}
-
+ 
   /* --- Sidebar / index --- */
   .sidebar{
     width:220px;
@@ -103,13 +103,13 @@
     transition:background .12s ease;
   }
   .quickadd-btn:hover{background:#33404f;}
-
+ 
   /* --- Main --- */
   main{flex:1;padding:36px 44px;max-width:1080px;}
   .page-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:26px;flex-wrap:wrap;gap:10px;}
   h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:0;}
   .subtext{color:var(--ink-soft);font-size:13.5px;margin-top:4px;}
-
+ 
   .stat-row{display:flex;gap:14px;margin-bottom:30px;flex-wrap:wrap;}
   .stat-card{
     background:var(--surface);
@@ -124,7 +124,7 @@
   .stat-card.overdue .stat-num{color:var(--overdue);}
   .stat-card.warn .stat-num{color:var(--warn);}
   .stat-card.accent .stat-num{color:var(--accent);}
-
+ 
   .section-title{
     font-family:var(--serif);
     font-size:15.5px;
@@ -139,7 +139,7 @@
   .dot.warn{background:var(--warn);}
   .dot.accent{background:var(--accent);}
   .dot.done{background:var(--done);}
-
+ 
   .task-list{list-style:none;margin:0 0 30px 0;padding:0;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface);overflow:hidden;}
   .task-row{
     display:flex;
@@ -180,7 +180,7 @@
   .task-del{color:var(--ink-soft);cursor:pointer;font-size:16px;padding:0 4px;flex-shrink:0;}
   .task-del:hover{color:var(--overdue);}
   .empty-note{padding:22px 16px;color:var(--ink-soft);font-size:13.5px;text-align:center;}
-
+ 
   /* --- Calendar --- */
   .cal-head{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
   .cal-nav{
@@ -191,7 +191,7 @@
   .cal-nav:hover{border-color:var(--accent);color:var(--accent);}
   .cal-month{font-family:var(--serif);font-size:18px;font-weight:600;min-width:180px;}
   .cal-today-btn{margin-left:auto;font-size:12.5px;color:var(--accent);cursor:pointer;font-weight:600;border:1px solid var(--accent);padding:5px 12px;border-radius:14px;background:var(--accent-soft);}
-
+ 
   .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--line);border-radius:var(--radius-md);overflow:hidden;background:var(--surface);}
   .cal-dow{padding:8px 0;text-align:center;font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-soft);border-bottom:1px solid var(--line);}
   .cal-cell{
@@ -217,9 +217,9 @@
   .cal-badge.today{background:var(--warn-soft);color:var(--warn);}
   .cal-badge.future{background:var(--accent-soft);color:var(--accent);}
   .cal-badge.more{color:var(--ink-soft);font-weight:500;}
-
+ 
   .day-panel{margin-top:22px;}
-
+ 
   /* --- Companies --- */
   .company-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
   .company-card{
@@ -244,7 +244,7 @@
     color:var(--ink-soft);font-weight:600;font-size:13.5px;min-height:100px;
   }
   .add-company-card:hover{border-color:var(--accent);color:var(--accent);}
-
+ 
   .contact-strip{
     display:flex;align-items:center;justify-content:space-between;
     background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-md);
@@ -255,7 +255,7 @@
   .contact-strip-value{font-family:var(--mono);font-size:13.5px;margin-top:2px;}
   .back-link{color:var(--ink-soft);cursor:pointer;font-size:13px;margin-bottom:10px;display:inline-flex;align-items:center;gap:5px;font-weight:500;}
   .back-link:hover{color:var(--accent);}
-
+ 
   /* --- Modal --- */
   .overlay{
     position:fixed;inset:0;background:rgba(27,36,48,0.35);
@@ -286,10 +286,10 @@
   .btn-ghost:hover{color:var(--ink);}
   .btn-danger{background:transparent;color:var(--overdue);border-color:var(--overdue-soft);}
   .btn-danger:hover{background:var(--overdue-soft);}
-
+ 
   ::selection{background:var(--accent-soft);}
   .loading-note{padding:40px;text-align:center;color:var(--ink-soft);}
-
+ 
   @media (max-width: 720px){
     #app{flex-direction:column;}
     .sidebar{width:100%;flex-direction:row;overflow-x:auto;padding:14px 12px;border-right:none;border-bottom:1px solid var(--line);}
@@ -309,11 +309,11 @@
 <div id="app">
   <div class="loading-note">Loading your register…</div>
 </div>
-
+ 
 <script>
 (function(){
   "use strict";
-
+ 
   // ---------- state ----------
   let companies = [];   // {id, name, contact, notes, createdAt}
   let tasks = [];        // {id, companyId, title, dueDate (YYYY-MM-DD), status ('open'|'done'), notes, priority, createdAt}
@@ -322,7 +322,7 @@
   let selectedDay = null; // YYYY-MM-DD
   let modal = null; // {type:'quickadd'|'company'|'task', ...}
   let loaded = false;
-
+ 
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
   const todayStr = () => fmtDate(new Date());
   function fmtDate(d){
@@ -335,29 +335,34 @@
     return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year: d.getFullYear()!==new Date().getFullYear()?'numeric':undefined});
   }
   function daysBetween(a,b){ return Math.round((parseDate(b)-parseDate(a))/86400000); }
-
+ 
   // ---------- storage ----------
-  async function loadAll(){
+  // Uses browser localStorage so data persists on any real deployment (GitHub Pages, etc).
+  // Data is stored per-browser, per-device — it will not sync across different browsers/devices.
+  const STORAGE_KEY_COMPANIES = 'register_companies';
+  const STORAGE_KEY_TASKS = 'register_followups';
+ 
+  function loadAll(){
     try{
-      const c = await window.storage.get('companies');
-      companies = c ? JSON.parse(c.value) : [];
-    }catch(e){ companies = []; }
+      const c = localStorage.getItem(STORAGE_KEY_COMPANIES);
+      companies = c ? JSON.parse(c) : [];
+    }catch(e){ console.error('load companies failed', e); companies = []; }
     try{
-      const t = await window.storage.get('followups');
-      tasks = t ? JSON.parse(t.value) : [];
-    }catch(e){ tasks = []; }
+      const t = localStorage.getItem(STORAGE_KEY_TASKS);
+      tasks = t ? JSON.parse(t) : [];
+    }catch(e){ console.error('load tasks failed', e); tasks = []; }
     loaded = true;
     render();
   }
-  async function saveCompanies(){
-    try{ await window.storage.set('companies', JSON.stringify(companies)); }
-    catch(e){ console.error('save companies failed', e); }
+  function saveCompanies(){
+    try{ localStorage.setItem(STORAGE_KEY_COMPANIES, JSON.stringify(companies)); }
+    catch(e){ console.error('save companies failed', e); alert('Could not save — your browser storage may be full or disabled.'); }
   }
-  async function saveTasks(){
-    try{ await window.storage.set('followups', JSON.stringify(tasks)); }
-    catch(e){ console.error('save tasks failed', e); }
+  function saveTasks(){
+    try{ localStorage.setItem(STORAGE_KEY_TASKS, JSON.stringify(tasks)); }
+    catch(e){ console.error('save tasks failed', e); alert('Could not save — your browser storage may be full or disabled.'); }
   }
-
+ 
   // ---------- derived ----------
   function companyName(id){ const c=companies.find(c=>c.id===id); return c? c.name : '—'; }
   function openTasks(){ return tasks.filter(t=>t.status!=='done'); }
@@ -386,7 +391,7 @@
     if(diff===1) return 'tomorrow';
     return displayDate(dueDate);
   }
-
+ 
   // ---------- actions ----------
   function toggleTask(id){
     const t = tasks.find(t=>t.id===id);
@@ -432,7 +437,7 @@
     tasks = tasks.filter(t=>t.companyId!==id);
     saveCompanies(); saveTasks();
   }
-
+ 
   // ---------- rendering helpers ----------
   function el(tag, attrs, ...children){
     const e = document.createElement(tag);
@@ -449,7 +454,7 @@
     });
     return e;
   }
-
+ 
   function taskRow(t, opts={}){
     const cls = dueBadgeClass(t.dueDate, t.status);
     const row = el('li', {class:'task-row'},
@@ -463,7 +468,7 @@
     );
     return row;
   }
-
+ 
   function taskListSection(title, dotClass, list, opts={}){
     const wrap = el('div');
     wrap.appendChild(el('h3', {class:'section-title'}, el('span',{class:'dot '+dotClass}), title, ` (${list.length})`));
@@ -476,7 +481,7 @@
     wrap.appendChild(ul);
     return wrap;
   }
-
+ 
   // ---------- pages ----------
   function renderDashboard(container){
     container.appendChild(el('div',{class:'page-head'},
@@ -485,7 +490,7 @@
         el('div',{class:'subtext'}, new Date().toLocaleDateString('en-US',{weekday:'long', month:'long', day:'numeric'}))
       )
     ));
-
+ 
     const ov = overdueTasks(), td = todayTasks(), wk = weekTasks();
     container.appendChild(el('div',{class:'stat-row'},
       el('div',{class:'stat-card overdue'}, el('div',{class:'stat-num'}, String(ov.length)), el('div',{class:'stat-label'},'Overdue')),
@@ -493,15 +498,15 @@
       el('div',{class:'stat-card accent'}, el('div',{class:'stat-num'}, String(wk.length)), el('div',{class:'stat-label'},'Due This Week')),
       el('div',{class:'stat-card'}, el('div',{class:'stat-num'}, String(companies.length)), el('div',{class:'stat-label'},'Companies Tracked')),
     ));
-
+ 
     container.appendChild(taskListSection('Overdue', 'overdue', ov, {emptyText:'Nothing overdue — you\'re on top of it.'}));
     container.appendChild(taskListSection('Due Today', 'warn', td, {emptyText:'Nothing due today.'}));
     container.appendChild(taskListSection('Due This Week', 'accent', wk, {emptyText:'Nothing due in the next 7 days.'}));
   }
-
+ 
   function renderCalendar(container){
     container.appendChild(el('div',{class:'page-head'}, el('h1',{},'Calendar')));
-
+ 
     const year = calCursor.getFullYear(), month = calCursor.getMonth();
     const head = el('div',{class:'cal-head'},
       el('div',{class:'cal-nav', onclick:()=>{ calCursor.setMonth(calCursor.getMonth()-1); render(); }}, '‹'),
@@ -510,14 +515,14 @@
       el('div',{class:'cal-today-btn', onclick:()=>{ calCursor=new Date(); calCursor.setDate(1); selectedDay = todayStr(); render(); }}, 'Today')
     );
     container.appendChild(head);
-
+ 
     const grid = el('div',{class:'cal-grid'});
     ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d=>grid.appendChild(el('div',{class:'cal-dow'},d)));
-
+ 
     const firstOfMonth = new Date(year, month, 1);
     const startOffset = firstOfMonth.getDay();
     const gridStart = new Date(year, month, 1 - startOffset);
-
+ 
     for(let i=0;i<42;i++){
       const cellDate = new Date(gridStart); cellDate.setDate(gridStart.getDate()+i);
       const dayStr = fmtDate(cellDate);
@@ -540,7 +545,7 @@
       grid.appendChild(cell);
     }
     container.appendChild(grid);
-
+ 
     if(selectedDay){
       const dayTasks = tasksForDay(selectedDay);
       const panel = el('div',{class:'day-panel'});
@@ -553,7 +558,7 @@
       container.appendChild(panel);
     }
   }
-
+ 
   function renderCompaniesList(container){
     container.appendChild(el('div',{class:'page-head'},
       el('h1',{},'Companies')
@@ -579,7 +584,7 @@
     grid.appendChild(el('div',{class:'add-company-card', onclick:()=>openModal({type:'company'})}, '+ Add company'));
     container.appendChild(grid);
   }
-
+ 
   function renderCompanyDetail(container, id){
     const c = companies.find(c=>c.id===id);
     if(!c){ route={page:'companies'}; return renderCompaniesList(container); }
@@ -617,11 +622,11 @@
     container.appendChild(taskListSection('Open follow-ups', 'accent', open, {emptyText:'No open follow-ups for this company.'}));
     if(done.length) container.appendChild(taskListSection('Completed', 'done', done));
   }
-
+ 
   // ---------- modal ----------
   function closeModal(){ modal=null; render(); }
   function openModal(m){ modal=m; render(); }
-
+ 
   function renderModal(){
     if(!modal) return null;
     if(modal.type==='company'){
@@ -672,7 +677,7 @@
       const priSelect = el('select',{});
       [['normal','Normal'],['high','High priority']].forEach(([v,l])=>priSelect.appendChild(el('option',{value:v},l)));
       const notesInput = el('textarea',{placeholder:'Optional details'});
-
+ 
       const box = el('div',{class:'modal'},
         el('h2',{}, 'New follow-up'),
         el('div',{class:'field'}, el('label',{},'Company'), companySelect, newCompanyInput),
@@ -703,15 +708,15 @@
     }
     return null;
   }
-
+ 
   // ---------- root render ----------
   function render(){
     const app = document.getElementById('app');
     app.innerHTML = '';
     if(!loaded){ app.appendChild(el('div',{class:'loading-note'},'Loading your register…')); return; }
-
+ 
     const ovCount = overdueTasks().length;
-
+ 
     const sidebar = el('div',{class:'sidebar'},
       el('div',{class:'brand'}, 'The Register', el('span',{},'Follow-up tracker')),
       el('div',{class:'nav-item'+(route.page==='dashboard'?' active':''), onclick:()=>{route={page:'dashboard'}; render();}},
@@ -723,20 +728,21 @@
       )
     );
     app.appendChild(sidebar);
-
+ 
     const main = el('main',{});
     if(route.page==='dashboard') renderDashboard(main);
     else if(route.page==='calendar') renderCalendar(main);
     else if(route.page==='companies') renderCompaniesList(main);
     else if(route.page==='company') renderCompanyDetail(main, route.id);
     app.appendChild(main);
-
+ 
     const m = renderModal();
     if(m) app.appendChild(m);
   }
-
+ 
   loadAll();
 })();
 </script>
 </body>
 </html>
+ 
